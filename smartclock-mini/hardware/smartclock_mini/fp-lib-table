@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name smartclock)(type KiCad)(uri ${KIPRJMOD}/smartclock.pretty)(options "")(descr ""))
+)

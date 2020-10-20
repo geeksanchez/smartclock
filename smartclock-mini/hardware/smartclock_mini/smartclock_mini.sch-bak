@@ -1,0 +1,559 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr USLetter 11000 8500
+encoding utf-8
+Sheet 1 1
+Title "SmartClock ESP-01"
+Date "2020-10-08"
+Rev "1.0"
+Comp "Sansila"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Text Label 6200 3650 0    60   ~ 0
+RAW
+Text Label 4950 4050 0    60   ~ 0
+2
+Text Label 4950 4150 0    60   ~ 0
+3(**)
+Text Label 4950 4250 0    60   ~ 0
+4
+Text Label 4950 4350 0    60   ~ 0
+5(**)
+Text Label 4950 4450 0    60   ~ 0
+6(**)
+Text Label 4950 4550 0    60   ~ 0
+7
+Text Label 4950 4650 0    60   ~ 0
+8
+Text Label 4950 4750 0    60   ~ 0
+9(**)
+Text Label 6200 4750 0    60   ~ 0
+10(**/SS)
+Text Label 6200 4650 0    60   ~ 0
+11(**/MOSI)
+Text Label 6200 4550 0    60   ~ 0
+12(MISO)
+Text Label 6200 4450 0    60   ~ 0
+13(SCK)
+Text Label 6200 4350 0    60   ~ 0
+A0
+Text Label 6200 4250 0    60   ~ 0
+A1
+Text Label 6200 4150 0    60   ~ 0
+A2
+Text Label 6200 4050 0    60   ~ 0
+A3
+Text Notes 5225 3150 0    60   ~ 0
+Shield Arduino Pro Mini \n
+$Comp
+L Connector_Generic:Conn_01x12 P1
+U 1 1 56D754D1
+P 5500 4150
+F 0 "P1" H 5500 4800 50  0000 C CNN
+F 1 "Digital" V 5600 4150 50  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12" H 5500 4150 50  0001 C CNN
+F 3 "" H 5500 4150 50  0000 C CNN
+	1    5500 4150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x12 P4
+U 1 1 56D755F3
+P 6000 4150
+F 0 "P4" H 6000 4800 50  0000 C CNN
+F 1 "Analog" V 6100 4150 50  0000 C CNN
+F 2 "Socket_Arduino_Pro_Mini:Socket_Strip_Arduino_1x12" H 6000 4150 50  0001 C CNN
+F 3 "" H 6000 4150 50  0000 C CNN
+	1    6000 4150
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR03
+U 1 1 56D756B8
+P 5200 4850
+F 0 "#PWR03" H 5200 4600 50  0001 C CNN
+F 1 "GND" H 5200 4700 50  0000 C CNN
+F 2 "" H 5200 4850 50  0000 C CNN
+F 3 "" H 5200 4850 50  0000 C CNN
+	1    5200 4850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5300 3950 5200 3950
+Wire Wire Line
+	5200 3950 5200 4850
+Wire Wire Line
+	6475 3650 6200 3650
+$Comp
+L power:GND #PWR04
+U 1 1 56D75A03
+P 6475 3825
+F 0 "#PWR04" H 6475 3575 50  0001 C CNN
+F 1 "GND" H 6475 3675 50  0000 C CNN
+F 2 "" H 6475 3825 50  0000 C CNN
+F 3 "" H 6475 3825 50  0000 C CNN
+	1    6475 3825
+	1    0    0    -1  
+$EndComp
+Text Notes 5600 3650 0    60   ~ 0
+1
+$Comp
+L power:+3.3V #PWR0101
+U 1 1 5F7DC1DE
+P 8625 1875
+F 0 "#PWR0101" H 8625 1725 50  0001 C CNN
+F 1 "+3.3V" H 8625 2025 50  0000 C CNN
+F 2 "" H 8625 1875 50  0000 C CNN
+F 3 "" H 8625 1875 50  0000 C CNN
+	1    8625 1875
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5F7DF83E
+P 7700 2300
+F 0 "#PWR0102" H 7700 2050 50  0001 C CNN
+F 1 "GND" H 7700 2150 50  0000 C CNN
+F 2 "" H 7700 2300 50  0000 C CNN
+F 3 "" H 7700 2300 50  0000 C CNN
+	1    7700 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8625 1925 8625 1875
+Wire Wire Line
+	7700 2225 7700 2300
+Text GLabel 8650 2225 2    50   Input ~ 0
+TX
+Text GLabel 8650 2125 2    50   Input ~ 0
+CH_PD
+Text GLabel 8650 2025 2    50   Input ~ 0
+RST
+Text GLabel 7675 1925 0    50   Input ~ 0
+RX
+Text Notes 7675 1550 0    50   ~ 0
+ESP-01 Module (WiFi)
+$Comp
+L Connector_Generic:Conn_02x04_Odd_Even J3
+U 1 1 5F7E7237
+P 8100 2125
+F 0 "J3" H 8150 1700 50  0000 C CNN
+F 1 "ESP-01" H 8150 1791 50  0000 C CNN
+F 2 "smartclock:ESP-01_Module" H 8100 2125 50  0001 C CNN
+F 3 "~" H 8100 2125 50  0001 C CNN
+	1    8100 2125
+	1    0    0    1   
+$EndComp
+$Comp
+L Connector_Generic:Conn_01x16 J2
+U 1 1 5F7E825D
+P 2975 5100
+F 0 "J2" H 3025 4300 50  0000 L CNN
+F 1 "Open-Smart TFT LCD" V 3100 4625 50  0000 L CNN
+F 2 "smartclock:LCD_TFT_2_00" H 2975 5100 50  0001 C CNN
+F 3 "~" H 2975 5100 50  0001 C CNN
+	1    2975 5100
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	7700 2225 7900 2225
+Wire Wire Line
+	7675 1925 7900 1925
+Wire Wire Line
+	8400 1925 8625 1925
+Wire Wire Line
+	8400 2025 8650 2025
+Wire Wire Line
+	8400 2125 8650 2125
+Wire Wire Line
+	8400 2225 8650 2225
+$Comp
+L power:GND #PWR0103
+U 1 1 5F7F489A
+P 2275 5800
+F 0 "#PWR0103" H 2275 5550 50  0001 C CNN
+F 1 "GND" H 2275 5650 50  0000 C CNN
+F 2 "" H 2275 5800 50  0000 C CNN
+F 3 "" H 2275 5800 50  0000 C CNN
+	1    2275 5800
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0104
+U 1 1 5F7F6290
+P 2075 5175
+F 0 "#PWR0104" H 2075 5025 50  0001 C CNN
+F 1 "+3.3V" H 2075 5325 50  0000 C CNN
+F 2 "" H 2075 5175 50  0000 C CNN
+F 3 "" H 2075 5175 50  0000 C CNN
+	1    2075 5175
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2075 5175 2075 5400
+Wire Wire Line
+	2075 5400 2375 5400
+Wire Wire Line
+	2375 5400 2375 5300
+Text GLabel 2475 5425 3    50   Input ~ 0
+CS
+Text GLabel 2575 5425 3    50   Input ~ 0
+RS
+Text GLabel 2675 5425 3    50   Input ~ 0
+WR
+Text GLabel 2875 5425 3    50   Input ~ 0
+RST
+Text GLabel 3075 5425 3    50   Input ~ 0
+DB0
+Text GLabel 3175 5425 3    50   Input ~ 0
+DB1
+Text GLabel 3275 5425 3    50   Input ~ 0
+DB2
+Text GLabel 3375 5425 3    50   Input ~ 0
+DB3
+Text GLabel 3475 5425 3    50   Input ~ 0
+DB4
+Text GLabel 3575 5425 3    50   Input ~ 0
+DB5
+Text GLabel 3675 5425 3    50   Input ~ 0
+DB6
+Text GLabel 3775 5425 3    50   Input ~ 0
+DB7
+Wire Wire Line
+	3775 5300 3775 5425
+Wire Wire Line
+	3675 5300 3675 5425
+Wire Wire Line
+	3575 5300 3575 5425
+Wire Wire Line
+	3475 5300 3475 5425
+Wire Wire Line
+	3375 5300 3375 5425
+Wire Wire Line
+	3275 5300 3275 5425
+Wire Wire Line
+	3175 5300 3175 5425
+Wire Wire Line
+	3075 5300 3075 5425
+Wire Wire Line
+	2875 5300 2875 5425
+Wire Wire Line
+	2675 5300 2675 5425
+Wire Wire Line
+	2575 5300 2575 5425
+Wire Wire Line
+	2475 5300 2475 5425
+Text Notes 3475 4700 2    50   ~ 0
+Open-Smart LCD TFT 2.0"
+Text GLabel 4825 4250 0    50   Input ~ 0
+DB4
+Wire Wire Line
+	4825 4250 5300 4250
+Text GLabel 4825 4450 0    50   Input ~ 0
+DB6
+Text GLabel 4825 4550 0    50   Input ~ 0
+DB7
+Wire Wire Line
+	4825 4450 5300 4450
+Wire Wire Line
+	4825 4550 5300 4550
+Text GLabel 4825 4650 0    50   Input ~ 0
+DB0
+Text GLabel 4825 4750 0    50   Input ~ 0
+DB1
+Wire Wire Line
+	4825 4650 5300 4650
+Wire Wire Line
+	4825 4750 5300 4750
+Text GLabel 6775 4450 2    50   Input ~ 0
+DB5
+Text GLabel 6775 4650 2    50   Input ~ 0
+DB3
+Text GLabel 6775 4750 2    50   Input ~ 0
+DB2
+Wire Wire Line
+	6200 4750 6775 4750
+Wire Wire Line
+	6200 4650 6775 4650
+Wire Wire Line
+	6200 4450 6775 4450
+Text GLabel 6775 4250 2    50   Input ~ 0
+WR
+Text GLabel 6775 4150 2    50   Input ~ 0
+RS
+Text GLabel 6775 4050 2    50   Input ~ 0
+CS
+Wire Wire Line
+	6200 4050 6775 4050
+Wire Wire Line
+	6200 4150 6775 4150
+Wire Wire Line
+	6200 4250 6775 4250
+Wire Wire Line
+	2775 5300 2775 5400
+Wire Wire Line
+	2775 5400 2375 5400
+Connection ~ 2375 5400
+Text GLabel 4825 4050 0    50   Input ~ 0
+TX
+Text GLabel 4825 4150 0    50   Input ~ 0
+RX
+Wire Wire Line
+	4825 4050 5300 4050
+Wire Wire Line
+	4825 4150 5300 4150
+Text GLabel 4825 4350 0    50   Input ~ 0
+CH_PD
+Text GLabel 6775 4550 2    50   Input ~ 0
+RST
+Wire Wire Line
+	6200 4550 6775 4550
+Wire Wire Line
+	4825 4350 5300 4350
+$Comp
+L sansila:DC-DC_Module U1
+U 1 1 5F83F2A9
+P 3325 2125
+F 0 "U1" H 3325 2400 50  0000 C CNN
+F 1 "DC-DC_Module" H 3325 2309 50  0000 C CNN
+F 2 "smartclock:LM2596_DC-DC_Module" H 3325 2125 50  0001 C CNN
+F 3 "" H 3325 2125 50  0001 C CNN
+	1    3325 2125
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0105
+U 1 1 5F840BED
+P 3875 2175
+F 0 "#PWR0105" H 3875 1925 50  0001 C CNN
+F 1 "GND" H 3875 2025 50  0000 C CNN
+F 2 "" H 3875 2175 50  0000 C CNN
+F 3 "" H 3875 2175 50  0000 C CNN
+	1    3875 2175
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+3.3V #PWR0106
+U 1 1 5F841356
+P 3875 2075
+F 0 "#PWR0106" H 3875 1925 50  0001 C CNN
+F 1 "+3.3V" H 3875 2225 50  0000 C CNN
+F 2 "" H 3875 2075 50  0000 C CNN
+F 3 "" H 3875 2075 50  0000 C CNN
+	1    3875 2075
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3775 2175 3875 2175
+Wire Wire Line
+	3775 2075 3875 2075
+$Comp
+L power:VCC #PWR02
+U 1 1 56D753B8
+P 6475 3500
+F 0 "#PWR02" H 6475 3350 50  0001 C CNN
+F 1 "VCC" H 6475 3650 50  0000 C CNN
+F 2 "" H 6475 3500 50  0000 C CNN
+F 3 "" H 6475 3500 50  0000 C CNN
+	1    6475 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:D D1
+U 1 1 5F86318E
+P 2475 2075
+F 0 "D1" V 2450 2000 50  0000 R CNN
+F 1 "1N4001" V 2575 2025 50  0000 R CNN
+F 2 "smartclock:D_A-405_P7.62mm_Horizontal" H 2475 2075 50  0001 C CNN
+F 3 "~" H 2475 2075 50  0001 C CNN
+	1    2475 2075
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:VCC #PWR0109
+U 1 1 5F866189
+P 2750 1925
+F 0 "#PWR0109" H 2750 1775 50  0001 C CNN
+F 1 "VCC" H 2750 2075 50  0000 C CNN
+F 2 "" H 2750 1925 50  0000 C CNN
+F 3 "" H 2750 1925 50  0000 C CNN
+	1    2750 1925
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0110
+U 1 1 5F8689FD
+P 2750 2300
+F 0 "#PWR0110" H 2750 2050 50  0001 C CNN
+F 1 "GND" H 2750 2150 50  0000 C CNN
+F 2 "" H 2750 2300 50  0000 C CNN
+F 3 "" H 2750 2300 50  0000 C CNN
+	1    2750 2300
+	1    0    0    -1  
+$EndComp
+Text Notes 2475 1575 0    50   ~ 0
+DC/DC Power Module
+Wire Wire Line
+	2275 5300 2275 5725
+$Comp
+L Device:Q_NPN_BEC Q1
+U 1 1 5F7FC277
+P 3075 5850
+F 0 "Q1" H 2950 5975 50  0000 L CNN
+F 1 "MMBT2222A" H 3225 5975 50  0000 L CNN
+F 2 "smartclock:SOT-23_Handsoldering" H 3275 5950 50  0001 C CNN
+F 3 "~" H 3075 5850 50  0001 C CNN
+	1    3075 5850
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	2975 5300 2975 5650
+$Comp
+L Device:R_Small R1
+U 1 1 5F7FF7A7
+P 3450 5850
+F 0 "R1" V 3550 5850 50  0000 C CNN
+F 1 "10k" V 3350 5850 50  0000 C CNN
+F 2 "smartclock:R_Axial_DIN0207_L6.3mm_D2.5mm_P7.62mm_Horizontal" H 3450 5850 50  0001 C CNN
+F 3 "~" H 3450 5850 50  0001 C CNN
+	1    3450 5850
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3275 5850 3350 5850
+Text GLabel 3650 5850 2    50   Input ~ 0
+LED
+Wire Wire Line
+	3550 5850 3650 5850
+Wire Wire Line
+	2275 5725 2425 5725
+Wire Wire Line
+	2425 5725 2425 6075
+Wire Wire Line
+	2425 6075 2975 6075
+Wire Wire Line
+	2975 6075 2975 6050
+Connection ~ 2275 5725
+Wire Wire Line
+	2275 5725 2275 5800
+Text GLabel 6775 4350 2    50   Input ~ 0
+LED
+Wire Wire Line
+	6200 4350 6775 4350
+$Comp
+L Connector_Generic:Conn_01x02 J1
+U 1 1 5F8297FA
+P 1950 2175
+F 0 "J1" H 1868 1850 50  0000 C CNN
+F 1 "Conn_01x02" H 1868 1941 50  0000 C CNN
+F 2 "smartclock:BOR5.0-2" H 1950 2175 50  0001 C CNN
+F 3 "~" H 1950 2175 50  0001 C CNN
+	1    1950 2175
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	2150 2075 2325 2075
+Wire Wire Line
+	2625 2075 2750 2075
+Wire Wire Line
+	2750 1925 2750 2075
+Connection ~ 2750 2075
+Wire Wire Line
+	2750 2075 2875 2075
+Wire Wire Line
+	2750 2300 2750 2175
+Wire Wire Line
+	2150 2175 2750 2175
+Connection ~ 2750 2175
+Wire Wire Line
+	2750 2175 2875 2175
+Wire Wire Line
+	6475 3500 6475 3650
+Wire Wire Line
+	6200 3750 6475 3750
+Wire Wire Line
+	6475 3750 6475 3825
+$Comp
+L power:PWR_FLAG #FLG0101
+U 1 1 5F84B1C2
+P 4425 1425
+F 0 "#FLG0101" H 4425 1500 50  0001 C CNN
+F 1 "PWR_FLAG" H 4425 1598 50  0000 C CNN
+F 2 "" H 4425 1425 50  0001 C CNN
+F 3 "~" H 4425 1425 50  0001 C CNN
+	1    4425 1425
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:VCC #PWR0107
+U 1 1 5F84BD87
+P 4125 1425
+F 0 "#PWR0107" H 4125 1275 50  0001 C CNN
+F 1 "VCC" H 4125 1575 50  0000 C CNN
+F 2 "" H 4125 1425 50  0000 C CNN
+F 3 "" H 4125 1425 50  0000 C CNN
+	1    4125 1425
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4125 1425 4125 1525
+Wire Wire Line
+	4125 1525 4425 1525
+Wire Wire Line
+	4425 1525 4425 1425
+NoConn ~ 6200 3850
+NoConn ~ 6200 3950
+NoConn ~ 5300 3850
+NoConn ~ 5300 3750
+NoConn ~ 5300 3650
+NoConn ~ 7900 2025
+NoConn ~ 7900 2125
+$Comp
+L Mechanical:MountingHole H?
+U 1 1 5F85AD24
+P 8250 3750
+F 0 "H?" H 8350 3796 50  0000 L CNN
+F 1 "MountingHole" H 8350 3705 50  0000 L CNN
+F 2 "Mounting_Holes:MountingHole_3.2mm_M3" H 8250 3750 50  0001 C CNN
+F 3 "~" H 8250 3750 50  0001 C CNN
+	1    8250 3750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H?
+U 1 1 5F85C305
+P 8250 3950
+F 0 "H?" H 8350 3996 50  0000 L CNN
+F 1 "MountingHole" H 8350 3905 50  0000 L CNN
+F 2 "Mounting_Holes:MountingHole_3.2mm_M3" H 8250 3950 50  0001 C CNN
+F 3 "~" H 8250 3950 50  0001 C CNN
+	1    8250 3950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H?
+U 1 1 5F85C5F0
+P 8250 4150
+F 0 "H?" H 8350 4196 50  0000 L CNN
+F 1 "MountingHole" H 8350 4105 50  0000 L CNN
+F 2 "Mounting_Holes:MountingHole_3.2mm_M3" H 8250 4150 50  0001 C CNN
+F 3 "~" H 8250 4150 50  0001 C CNN
+	1    8250 4150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H?
+U 1 1 5F85C8E4
+P 8250 4350
+F 0 "H?" H 8350 4396 50  0000 L CNN
+F 1 "MountingHole" H 8350 4305 50  0000 L CNN
+F 2 "Mounting_Holes:MountingHole_3.2mm_M3" H 8250 4350 50  0001 C CNN
+F 3 "~" H 8250 4350 50  0001 C CNN
+	1    8250 4350
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC

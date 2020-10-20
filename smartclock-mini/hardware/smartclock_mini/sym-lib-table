@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name sansila)(type Legacy)(uri D:/projects/kicad/libraries/sansila.lib)(options "")(descr ""))
+  (lib (name smartclock)(type Legacy)(uri ${KIPRJMOD}/library/smartclock.lib)(options "")(descr ""))
+)
