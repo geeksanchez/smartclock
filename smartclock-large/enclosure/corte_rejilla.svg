@@ -37,7 +37,7 @@
      inkscape:cx="405.93179"
      inkscape:cy="834.11209"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer2"
+     inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:snap-grids="false"
      inkscape:snap-to-guides="false"
@@ -58,7 +58,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -530,7 +530,8 @@
      inkscape:groupmode="layer"
      id="layer1"
      style="display:inline;opacity:1"
-     transform="translate(0,-17.6)">
+     transform="translate(0,-17.6)"
+     sodipodi:insensitive="true">
     <rect
        id="rect10-3-1-6"
        width="5.9963636"
