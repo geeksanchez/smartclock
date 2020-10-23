@@ -1,6 +1,7 @@
 //#include "MicSensorTask.h"
 //#include "LuxSensorTask.h"
 //#include "RTCTask.h"
+#include "SmartclockTask.h"
 #include <ESP8266WiFi.h>
 #include "MatrixTask.h"
 #include "WiFiTask.h"
@@ -8,8 +9,9 @@
 #include "MQTTTask.h"
 #include "OTATask.h"
 
-#define VERSION "0.8"
+#define VERSION "0.9"
 
+SmartclockTask smartclockClient;
 MatrixTask matrixClient;
 //MicSensorTask micSensor;
 //LuxSensorTask luxSensor;
@@ -28,6 +30,14 @@ void matrixUpdate();
 void ntpUpdate();
 void mqttUpdate();
 void otaUpdate() ;
+
+void smartclockUpdate(uint8_t state)
+{
+  if (state == 1)
+  {
+    matrixClient.DrawIcon(1);
+  }
+}
 
 void matrixUpdate(char *msg)
 {
@@ -130,6 +140,7 @@ void ntpUpdate()
     snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
     mqttTaskClient.publish(title, msg);
     snprintf(lastTime, 10, "%s", msg);
+    matrixClient.DrawIcon(2);
     matrixClient.DrawTime(msg);
   }
 }
@@ -204,6 +215,8 @@ void setup()
 
   snprintf(lastTime, 10, "0000");
 
+  smartclockClient.notifySmartclock = smartclockUpdate;
+  Scheduler.start(&smartclockClient);
   matrixClient.notifyMatrix = &matrixUpdate;
   Scheduler.start(&matrixClient);
 //  micSensor.setPin(D4);
