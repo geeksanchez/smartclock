@@ -8,6 +8,7 @@ class SmartclockTask : public Task
 {
 
 private:
+    uint8_t st;
 
 protected:
     void setup();
@@ -15,6 +16,7 @@ protected:
 
 public:
     void (*notifySmartclock)(uint8_t state);
+    void start();
 };
 
 #endif

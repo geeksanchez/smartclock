@@ -2,10 +2,20 @@
 
 void SmartclockTask::setup()
 {
-    notifySmartclock(1);
+    st = 1;
 }
 
-void SmartclockTask::loop()
+void SmartclockTask::start()
 {
+    st = 1;
+}
+
+    void SmartclockTask::loop()
+{
+    if (st == 1)
+    {
+        notifySmartclock(1);
+        st = 0;
+    }
     yield();
 }

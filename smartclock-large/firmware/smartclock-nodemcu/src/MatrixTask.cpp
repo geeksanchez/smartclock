@@ -13,8 +13,12 @@ void MatrixTask::setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(BRIGHTNESS);
+    notifyMatrix(NULL);
+}
+
+void MatrixTask::Cls()
+{
     leds.fill_solid(CRGB::Black);
-    DrawIcon(1);
     FastLED.show();
 }
 

@@ -15,7 +15,7 @@ protected:
 
 public:
     char msg[20];
-    void (*notifyOTA)(void);
+    void (*notifyOTA)(char *text);
 };
 
 #endif

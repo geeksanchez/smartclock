@@ -12,17 +12,16 @@ void OTATask::setup()
     ArduinoOTA.onStart([=]() {
         strcpy(this->msg, "OTA Start");
         yield();
-        notifyOTA();
+        notifyOTA(this->msg);
     });
     ArduinoOTA.onEnd([=]() {
         strcpy(this->msg, "OTA End");
         yield();
-        notifyOTA();
+        notifyOTA(this->msg);
     });
     ArduinoOTA.onProgress([=](unsigned int progress, unsigned int total) {
         sprintf(this->msg, "Progress: %u%%", (progress / (total / 100)));
         yield();
-        notifyOTA();
     });
     ArduinoOTA.onError([=](ota_error_t error) {
         if (error == OTA_AUTH_ERROR)
@@ -36,7 +35,7 @@ void OTATask::setup()
         else if (error == OTA_END_ERROR)
             sprintf(this->msg, "Error[%u]: End Failed", error);
         yield();
-        notifyOTA();
+        notifyOTA(this->msg);
     });
     ArduinoOTA.begin();
 }
