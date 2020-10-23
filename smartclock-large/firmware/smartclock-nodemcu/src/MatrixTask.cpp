@@ -5,7 +5,7 @@
 
 #define DATA_PIN 3
 #define NUM_LEDS 256
-#define BRIGHTNESS 10
+#define BRIGHTNESS 5
 
 CRGBArray<NUM_LEDS> leds;
 
@@ -13,6 +13,11 @@ void MatrixTask::setup()
 {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(BRIGHTNESS);
+    notifyMatrix(NULL);
+}
+
+void MatrixTask::Cls()
+{
     leds.fill_solid(CRGB::Black);
     FastLED.show();
 }

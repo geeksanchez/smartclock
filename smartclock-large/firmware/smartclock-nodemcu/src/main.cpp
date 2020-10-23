@@ -1,6 +1,7 @@
 //#include "MicSensorTask.h"
 //#include "LuxSensorTask.h"
 //#include "RTCTask.h"
+#include "SmartclockTask.h"
 #include <ESP8266WiFi.h>
 #include "MatrixTask.h"
 #include "WiFiTask.h"
@@ -8,8 +9,9 @@
 #include "MQTTTask.h"
 #include "OTATask.h"
 
-#define VERSION "0.8"
+#define VERSION "0.10"
 
+SmartclockTask smartclockClient;
 MatrixTask matrixClient;
 //MicSensorTask micSensor;
 //LuxSensorTask luxSensor;
@@ -29,9 +31,17 @@ void ntpUpdate();
 void mqttUpdate();
 void otaUpdate() ;
 
+void smartclockUpdate(uint8_t state)
+{
+  if (state == 1)
+  {
+    matrixClient.DrawIcon(state);
+  }
+}
+
 void matrixUpdate(char *msg)
 {
-  Serial.printf(msg);
+  smartclockClient.start();
 }
 /*
 void clapUpdate()
@@ -130,6 +140,7 @@ void ntpUpdate()
     snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
     mqttTaskClient.publish(title, msg);
     snprintf(lastTime, 10, "%s", msg);
+    matrixClient.DrawIcon(2);
     matrixClient.DrawTime(msg);
   }
 }
@@ -169,13 +180,9 @@ void mqttUpdate()
         matrixClient.setBrightness(atoi(msg));
       }
     }
-    else if (strcmp(token, "TIME") == 0)
+    else if (strcmp(token, "START") == 0)
     {
-      if (rest != NULL)
-      {
-        snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
-        matrixClient.DrawTime(msg);
-      }
+      smartclockClient.start();
     }
     else if (strcmp(token, "IPADDR") == 0)
     {
@@ -193,9 +200,11 @@ void mqttUpdate()
   }
 }
 
-void otaUpdate()
+void otaUpdate(char *msg)
 {
-  Serial.println(otaTaskClient.msg);
+  char title[50];
+  snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
+  mqttTaskClient.publish(title, msg);
 }
 
 void setup()
@@ -221,7 +230,9 @@ void setup()
   Scheduler.start(&mqttTaskClient);
   otaTaskClient.notifyOTA = &otaUpdate;
   Scheduler.start(&otaTaskClient);
-  
+  smartclockClient.notifySmartclock = smartclockUpdate;
+  Scheduler.start(&smartclockClient);
+
   Scheduler.begin();
 }
 

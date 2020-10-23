@@ -95,6 +95,7 @@ class MatrixTask : public Task
 
     public:
         void setBrightness(uint8_t lux);
+        void Cls();
         void DrawIcon(uint8_t icon);
         void DrawMsg(char *msg, byte length);
         void DrawTime(char *msg);
