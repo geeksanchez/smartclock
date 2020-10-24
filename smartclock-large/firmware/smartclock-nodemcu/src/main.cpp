@@ -31,22 +31,30 @@ void smartclockUpdate(uint8_t state, char *msg, int len)
   {
   case REINICIO:
     matrixClient.DrawIcon(REINICIO);
+    matrixClient.show();
     break;
   case RELOJ:
     matrixClient.DrawMsg(msg, len, TIME_MODE);
     matrixClient.DrawIcon(RELOJ);
+    matrixClient.show();
     break;
   case FECHA:
     matrixClient.DrawMsg(msg, len, DATE_MODE);
     matrixClient.DrawIcon(FECHA);
+    matrixClient.show();
+    break;
   case ICON:
     matrixClient.DrawIcon(atoi(msg));
+    matrixClient.show();
     break;
   case MENSAJE:
     matrixClient.DrawMsg(msg, len, TEXT_MODE);
     matrixClient.DrawIcon(MENSAJE);
+    matrixClient.show();
+    break;
   case LUX:
     matrixClient.setBrightness(atoi(msg));
+    matrixClient.show();
     break;
   default:
     break;
@@ -96,6 +104,14 @@ void mqttUpdate()
       {
         int len = snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
         smartclockUpdate(MENSAJE, msg, len);
+      }
+    }
+    else if (strcmp(token, "TIME") == 0)
+    {
+      if (rest != NULL)
+      {
+        int len = snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
+        smartclockUpdate(RELOJ, msg, len);
       }
     }
     else if (strcmp(token, "ICON") == 0)

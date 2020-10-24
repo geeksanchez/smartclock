@@ -23,7 +23,6 @@ void MatrixTask::setup()
 void MatrixTask::clearText()
 {
     fill_solid(leds+64, 192, CRGB::Black);
-    FastLED.show();
 }
 
 void MatrixTask::writePixel(unsigned int bX, unsigned int bY,  uint32_t colour)
@@ -34,6 +33,137 @@ void MatrixTask::writePixel(unsigned int bX, unsigned int bY,  uint32_t colour)
     }
     uint8_t pos = ((bX / 8) * 64) + (bX % 8) + (bY * 8) + 64;
     leds[pos] = colour;
+}
+
+void MatrixTask::drawLine(int x1, int y1, int x2, int y2, uint32_t colour)
+{
+    int dy = y2 - y1;
+    int dx = x2 - x1;
+    int stepx, stepy;
+
+    if (dy < 0)
+    {
+        dy = -dy;
+        stepy = -1;
+    }
+    else
+    {
+        stepy = 1;
+    }
+    if (dx < 0)
+    {
+        dx = -dx;
+        stepx = -1;
+    }
+    else
+    {
+        stepx = 1;
+    }
+    dy <<= 1; // dy is now 2*dy
+    dx <<= 1; // dx is now 2*dx
+
+    writePixel(x1, y1, colour);
+    if (dx > dy)
+    {
+        int fraction = dy - (dx >> 1); // same as 2*dy - dx
+        while (x1 != x2)
+        {
+            if (fraction >= 0)
+            {
+                y1 += stepy;
+                fraction -= dx; // same as fraction -= 2*dx
+            }
+            x1 += stepx;
+            fraction += dy; // same as fraction -= 2*dy
+            writePixel(x1, y1, colour);
+        }
+    }
+    else
+    {
+        int fraction = dx - (dy >> 1);
+        while (y1 != y2)
+        {
+            if (fraction >= 0)
+            {
+                x1 += stepx;
+                fraction -= dy;
+            }
+            y1 += stepy;
+            fraction += dx;
+            writePixel(x1, y1, colour);
+        }
+    }
+}
+void MatrixTask::drawCircle(int xCenter, int yCenter, int radius, uint32_t colour)
+{
+    int x = 0;
+    int y = radius;
+    int p = (5 - radius * 4) / 4;
+
+    drawCircleSub(xCenter, yCenter, x, y, colour);
+    while (x < y)
+    {
+        x++;
+        if (p < 0)
+        {
+            p += 2 * x + 1;
+        }
+        else
+        {
+            y--;
+            p += 2 * (x - y) + 1;
+        }
+        drawCircleSub(xCenter, yCenter, x, y, colour);
+    }
+}
+
+void MatrixTask::drawCircleSub(int cx, int cy, int x, int y, uint32_t colour)
+{
+
+    if (x == 0)
+    {
+        writePixel(cx, cy + y, colour);
+        writePixel(cx, cy - y, colour);
+        writePixel(cx + y, cy, colour);
+        writePixel(cx - y, cy, colour);
+    }
+    else if (x == y)
+    {
+        writePixel(cx + x, cy + y, colour);
+        writePixel(cx - x, cy + y, colour);
+        writePixel(cx + x, cy - y, colour);
+        writePixel(cx - x, cy - y, colour);
+    }
+    else if (x < y)
+    {
+        writePixel(cx + x, cy + y, colour);
+        writePixel(cx - x, cy + y, colour);
+        writePixel(cx + x, cy - y, colour);
+        writePixel(cx - x, cy - y, colour);
+        writePixel(cx + y, cy + x, colour);
+        writePixel(cx - y, cy + x, colour);
+        writePixel(cx + y, cy - x, colour);
+        writePixel(cx - y, cy - x, colour);
+    }
+}
+
+/*--------------------------------------------------------------------------------------
+ Draw or clear a box(rectangle) with a single pixel border
+--------------------------------------------------------------------------------------*/
+void MatrixTask::drawBox(int x1, int y1, int x2, int y2, uint32_t colour)
+{
+    drawLine(x1, y1, x2, y1, colour);
+    drawLine(x2, y1, x2, y2, colour);
+    drawLine(x2, y2, x1, y2, colour);
+    drawLine(x1, y2, x1, y1, colour);
+}
+
+void MatrixTask::drawFilledBox(int x1, int y1, int x2, int y2, uint32_t colour)
+{
+    for (int b = x1; b <= x2; b++)
+    {
+        drawLine(b, y1, b, y2, colour);
+    }
 }
 
 void MatrixTask::DrawIcon(uint8_t icon)
@@ -47,7 +177,6 @@ void MatrixTask::DrawIcon(uint8_t icon)
             leds[i + j * 8] = CRGB((bitmap[i + j * 8]) & 0xFF, (bitmap[i + j * 8] >> 8) & 0xFF, (bitmap[i + j * 8] >> 16) & 0xFF);
         }
     }
-    FastLED.show();
 }
 
 void MatrixTask::selectFont(const uint8_t *font)
@@ -94,7 +223,7 @@ byte MatrixTask::drawChar(const int bX, const int bY, const char letter, uint32_
     if (c == ' ')
     {
         byte charWide = charWidth(' ');
-//        this->drawFilledBox(bX, bY, bX + charWide, bY + height, bgcolour);
+        this->drawFilledBox(bX, bY, bX + charWide, bY + height, bgcolour);
         return charWide;
     }
     uint8_t width = 0;
@@ -172,7 +301,7 @@ void MatrixTask::drawString(int bX, int bY, const char *bChars, byte length,
         return;
 
     int strWidth = 0;
-//    this->drawLine(bX - 1, bY, bX - 1, bY + height, bgcolour);
+    this->drawLine(bX - 1, bY, bX - 1, bY + height, bgcolour);
 
     for (byte i = 0; i < length; i++)
     {
@@ -180,7 +309,7 @@ void MatrixTask::drawString(int bX, int bY, const char *bChars, byte length,
         if (charWide > 0)
         {
             strWidth += charWide;
-//            this->drawLine(bX + strWidth, bY, bX + strWidth, bY + height, bgcolour);
+            this->drawLine(bX + strWidth, bY, bX + strWidth, bY + height, bgcolour);
             strWidth++;
         }
         else if (charWide < 0)
@@ -200,28 +329,27 @@ void MatrixTask::DrawMsg(char *msg, byte length, uint8_t mode)
 {
     switch (mode)
     {
+    case TEXT_MODE:
+        clearText();
+        drawString(1, 0, msg, length, CRGB::Yellow, CRGB::Black);
+        break;
     case TIME_MODE:
         if (length == 4)
         {
             clearText();
             drawString(4, 0, msg, 2, CRGB::White, CRGB::Black);
-            drawString(12, 0, ":", 2, CRGB::White, CRGB::Black);
+            drawString(12, 0, ":", 1, CRGB::White, CRGB::Black);
             drawString(14, 0, msg + 2, 2, CRGB::White, CRGB::Black);
-            FastLED.show();
         }
         break;
     case DATE_MODE:
         if (length == 6)
         {
+            clearText();
             drawString(2, 0, msg, 2, CRGB::White, CRGB::Black);
             drawString(10, 0, "/", 2, CRGB::White, CRGB::Black);
             drawString(12, 0, msg + 2, 2, CRGB::White, CRGB::Black);
-            FastLED.show();
         }
-        break;
-    case TEXT_MODE:
-        drawString(2, 0, msg, length, CRGB::White, CRGB::Black);
-        FastLED.show();
         break;
     case SCROLL_MODE:
         break;
@@ -230,10 +358,14 @@ void MatrixTask::DrawMsg(char *msg, byte length, uint8_t mode)
     }
 }
 
+void MatrixTask::show()
+{
+    FastLED.show();
+}
+
 void MatrixTask::setBrightness(uint8_t lux)
 {
     FastLED.setBrightness(lux);
-    FastLED.show();
 }
 
 void MatrixTask::loop()
