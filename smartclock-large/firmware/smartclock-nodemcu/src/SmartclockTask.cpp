@@ -1,21 +1,32 @@
 #include "SmartclockTask.h"
 
+#define PERIOD 500
+
+unsigned long curtime;
+unsigned long prevtime;
+uint8_t start;
+
 void SmartclockTask::setup()
 {
-    st = 1;
+    prevtime = millis();
+    start = 1;
 }
 
-void SmartclockTask::start()
+void SmartclockTask::loop()
 {
-    st = 1;
-}
-
-    void SmartclockTask::loop()
-{
-    if (st == 1)
+    curtime = millis();
+    if ((curtime - prevtime) >= PERIOD)
     {
-        notifySmartclock(1);
-        st = 0;
+        prevtime = curtime;
+        if (start == 1) 
+        {
+            notifySmartclock(1, NULL, 0);
+            start = 0;
+        }
+        else
+        {
+            notifySmartclock(0, NULL, 0);
+        }
     }
     yield();
 }

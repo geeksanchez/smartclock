@@ -1,6 +1,4 @@
-//#include "MicSensorTask.h"
-//#include "LuxSensorTask.h"
-//#include "RTCTask.h"
+#include "constants.h"
 #include "SmartclockTask.h"
 #include <ESP8266WiFi.h>
 #include "MatrixTask.h"
@@ -13,123 +11,52 @@
 
 SmartclockTask smartclockClient;
 MatrixTask matrixClient;
-//MicSensorTask micSensor;
-//LuxSensorTask luxSensor;
-//RTCTask rtcClient;
 WiFiTask wifiClient;
 NTPTask ntpClient;
 MQTTTask mqttTaskClient;
 OTATask otaTaskClient;
 
+enum ESTADOS {STILL, REINICIO, RELOJ, FECHA, MENSAJE, ICON, LUX};
+
 char lastTime[10];
 
 void matrixUpdate();
-//void clapUpdate();
-//void luxUpdate();
-//void rtcUpdate();
 void ntpUpdate();
 void mqttUpdate();
 void otaUpdate() ;
 
-void smartclockUpdate(uint8_t state)
+void smartclockUpdate(uint8_t state, char *msg, int len)
 {
-  if (state == 1)
+  switch (state)
   {
-    matrixClient.DrawIcon(state);
+  case REINICIO:
+    matrixClient.DrawIcon(REINICIO);
+    break;
+  case RELOJ:
+    matrixClient.DrawMsg(msg, len, TIME_MODE);
+    matrixClient.DrawIcon(RELOJ);
+    break;
+  case FECHA:
+    matrixClient.DrawMsg(msg, len, DATE_MODE);
+    matrixClient.DrawIcon(FECHA);
+  case ICON:
+    matrixClient.DrawIcon(atoi(msg));
+    break;
+  case MENSAJE:
+    matrixClient.DrawMsg(msg, len, TEXT_MODE);
+    matrixClient.DrawIcon(MENSAJE);
+  case LUX:
+    matrixClient.setBrightness(atoi(msg));
+    break;
+  default:
+    break;
   }
 }
 
 void matrixUpdate(char *msg)
 {
-  smartclockClient.start();
 }
-/*
-void clapUpdate()
-{
-  char title[50];
-  snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
-  mqttTaskClient.publish(title, "CLAP");
-}
-*/
-/*
-void luxUpdate()
-{
-  Serial.printf("Lux: %d\n", luxSensor.lux);
-}
-*/
-/*
-void rtcUpdate()
-{
-  char msg[10];
-  if (rtcClient.h < 12)
-  {
-    if (rtcClient.h == 0)
-    {
-      rtcClient.h = 12;
-    }
-    if (rtcClient.m < 10)
-    {
-      snprintf(msg, TIME_BUFFER_SIZE, "%d0%d", rtcClient.h, rtcClient.m);
-    }
-    else
-    {
-      snprintf(msg, TIME_BUFFER_SIZE, "%d%d", rtcClient.h, rtcClient.m);
-    }
-  }
-  else
-  {
-    if (rtcClient.h == 12)
-    {
-      if (rtcClient.m < 10)
-      {
-        snprintf(msg, TIME_BUFFER_SIZE, "%d0%d", rtcClient.h, rtcClient.m);
-      }
-      else
-      {
-        snprintf(msg, TIME_BUFFER_SIZE, "%d%d", rtcClient.h, rtcClient.m);
-      }
-    }
-    else
-    {
-      if (rtcClient.m < 10)
-      {
-        snprintf(msg, TIME_BUFFER_SIZE, "%d0%d", (rtcClient.h - 12), rtcClient.m);
-      }
-      else
-      {
-        snprintf(msg, TIME_BUFFER_SIZE, "%d%d", (rtcClient.h - 12), rtcClient.m);
-      }
-    }
-  }
-  if (strcmp(lastTime, msg) != 0)
-  {
-    matrixClient.DrawTime(msg);
-    char title[50];
-    snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
-    mqttTaskClient.publish(title, msg);
-    strcpy(lastTime, msg);
-  }
 
-  char MO[3], DA[3];
-  if (rtcClient.D < 10)
-  {
-    snprintf(DA, 3, "0%d", rtcClient.D);
-  }
-  else
-  {
-    snprintf(DA, 3, "%d", rtcClient.D);
-  }
-  if (rtcClient.M < 10)
-  {
-    snprintf(MO, 3, "0%d", rtcClient.M);
-  }
-  else
-  {
-    snprintf(MO, 3, "%d", rtcClient.M);
-  }
-  snprintf(msg, DATE_BUFFER_SIZE, "%s%s%d", DA, MO, rtcClient.Y);
-}
-*/
 void ntpUpdate()
 {
   char title[50];
@@ -140,8 +67,7 @@ void ntpUpdate()
     snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
     mqttTaskClient.publish(title, msg);
     snprintf(lastTime, 10, "%s", msg);
-    matrixClient.DrawIcon(2);
-    matrixClient.DrawTime(msg);
+    smartclockUpdate(RELOJ, msg, 4);
   }
 }
 
@@ -164,12 +90,20 @@ void mqttUpdate()
       snprintf(msg, MSG_BUFFER_SIZE, "SSID: %s", wifiClient.wifi->getWifiSsidParameter()->valueBuffer);
       mqttTaskClient.publish(title, msg);
     }
+    else if (strcmp(token, "MSG") == 0)
+    {
+      if (rest != NULL)
+      {
+        int len = snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
+        smartclockUpdate(MENSAJE, msg, len);
+      }
+    }
     else if (strcmp(token, "ICON") == 0)
     {
       if (rest != NULL)
       {
         snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
-        matrixClient.DrawIcon(atoi(msg));
+        smartclockUpdate(ICON, msg, 1);
       }
     }
     else if (strcmp(token, "LUX") == 0)
@@ -177,12 +111,8 @@ void mqttUpdate()
       if (rest != NULL)
       {
         snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
-        matrixClient.setBrightness(atoi(msg));
+        smartclockUpdate(LUX, msg, 1);
       }
-    }
-    else if (strcmp(token, "START") == 0)
-    {
-      smartclockClient.start();
     }
     else if (strcmp(token, "IPADDR") == 0)
     {
@@ -215,14 +145,6 @@ void setup()
 
   matrixClient.notifyMatrix = &matrixUpdate;
   Scheduler.start(&matrixClient);
-//  micSensor.setPin(D4);
-//  micSensor.notifyClap = &clapUpdate;
-//  Scheduler.start(&micSensor);
-//  luxSensor.notifyLux = &luxUpdate;
-//  luxSensor.lux = 10;
-//  Scheduler.start(&luxSensor);
-//  rtcClient.notifyRTC = &rtcUpdate;
-//  Scheduler.start(&rtcClient);
   Scheduler.start(&wifiClient);
   ntpClient.notifyNTP = &ntpUpdate;
   Scheduler.start(&ntpClient);
