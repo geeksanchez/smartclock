@@ -334,21 +334,17 @@ void MatrixTask::DrawMsg(char *msg, byte length, uint8_t mode)
         drawString(1, 0, msg, length, CRGB::Yellow, CRGB::Black);
         break;
     case TIME_MODE:
-        if (length == 4)
+        if (length == 5)
         {
             clearText();
-            drawString(4, 0, msg, 2, CRGB::White, CRGB::Black);
-            drawString(12, 0, ":", 1, CRGB::White, CRGB::Black);
-            drawString(14, 0, msg + 2, 2, CRGB::White, CRGB::Black);
+            drawString(4, 0, msg, 5, CRGB::White, CRGB::Black);
         }
         break;
     case DATE_MODE:
-        if (length == 6)
+        if (length == 5)
         {
             clearText();
-            drawString(2, 0, msg, 2, CRGB::White, CRGB::Black);
-            drawString(10, 0, "/", 2, CRGB::White, CRGB::Black);
-            drawString(12, 0, msg + 2, 2, CRGB::White, CRGB::Black);
+            drawString(2, 0, msg, 5, CRGB::White, CRGB::Black);
         }
         break;
     case SCROLL_MODE:

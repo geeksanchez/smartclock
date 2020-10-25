@@ -69,13 +69,13 @@ void ntpUpdate()
 {
   char title[50];
   char msg[256];
-  snprintf(msg, MSG_BUFFER_SIZE, "%02d%02d", ntpClient.h, ntpClient.m);
+  snprintf(msg, MSG_BUFFER_SIZE, "%02d:%02d", ntpClient.h, ntpClient.m);
   if (strcmp(lastTime, msg) != 0)
   {
     snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
     mqttTaskClient.publish(title, msg);
     snprintf(lastTime, 10, "%s", msg);
-    smartclockUpdate(RELOJ, msg, 4);
+    smartclockUpdate(RELOJ, msg, 5);
   }
 }
 
@@ -157,7 +157,7 @@ void setup()
 {
   Serial.begin(115200);
 
-  snprintf(lastTime, 10, "0000");
+  snprintf(lastTime, 10, "00:00");
 
   matrixClient.notifyMatrix = &matrixUpdate;
   Scheduler.start(&matrixClient);
