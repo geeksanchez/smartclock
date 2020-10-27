@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name smarckclock-ng)(type Legacy)(uri ${KIPRJMOD}/library/smarckclock-ng.lib)(options "")(descr ""))
+)
