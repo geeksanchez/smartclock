@@ -27,8 +27,8 @@ protected:
 public:
     uint8_t ready;
     void showBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t w, int16_t h);
-    void setPixel(uint16_t x, int16_t y, uint32_t colour);
-    void setText(uint16_t x, int16_t y, String msg, uint32_t colour);
+    void setPixel(int16_t x, int16_t y, uint32_t colour);
+    void setText(int16_t x, int16_t y, String msg, uint32_t colour);
     void lux(uint8_t i);
     void clear();
 };

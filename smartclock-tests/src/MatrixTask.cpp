@@ -21,7 +21,7 @@ void MatrixTask::setup()
     matrix->setFont(&TomThumb);
     matrix->fillScreen(0);
     matrix->show();
-    ready = 1;
+    this->ready = 1;
 }
 
 void MatrixTask::loop()
@@ -43,12 +43,12 @@ void MatrixTask::showBitmap(int16_t x, int16_t y, const uint8_t *bitmap, int16_t
     matrix->show();
 }
 
-void MatrixTask::setPixel(uint16_t x, int16_t y, uint32_t colour)
+void MatrixTask::setPixel(int16_t x, int16_t y, uint32_t colour)
 {
     matrix->drawPixel(x, y, colour);
 }
 
-void MatrixTask::setText(uint16_t x, int16_t y, String msg, uint32_t colour) 
+void MatrixTask::setText(int16_t x, int16_t y, String msg, uint32_t colour) 
 {
     matrix->setTextColor(colour);
     matrix->setCursor(x, y);

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "WiFiTask.h"
+#include <IotWebConf.h>
 #include "OTATask.h"
 #include "MatrixTask.h"
 #include <FS.h>
@@ -17,10 +18,12 @@ NTPTask ntpClient;
 void eventProcess(int8_t event);
 
 int fs_enabled;
-int ntp_updated;
 int state;
-os_timer_t myTimer;
-String currentTime, currentDate;
+bool do_scroll, state_done;
+os_timer_t eventTimer, scrollTimer;
+String currentTime, currentDate, MName, Message;
+int posX;
+uint32_t scroll_color;
 
 // Visualiza un texto en la posicion (x, y)
 void showText(uint16_t x, uint16_t y, String text, uint32_t colour)
@@ -34,23 +37,13 @@ void showText(uint16_t x, uint16_t y, String text, uint32_t colour)
 }
 
 // Hace scroll del texto a mostrar
-void scrollText(uint16_t x, uint16_t y, String text, uint32_t colour)
+void scrollText(uint32_t colour)
 {
   if (matrixClient.ready == 1)
   {
     matrixClient.ready = 0;
-    uint16_t step, x1, y1;
-    for (step = 0; step < (DISPLAY_MAX_X - x); step++)
-    {
-      for (x1 = x; x1 < DISPLAY_MAX_X; x1++)
-        for (y1 = y; y1 < DISPLAY_MAX_Y; y1++)
-        {
-          yield();
-          matrixClient.setPixel(x1, y1, 0);
-        }
-      matrixClient.setText(DISPLAY_MAX_X - step, y, text, colour);
-      delay(150);
-    }
+    scroll_color = colour;
+    do_scroll = true;
     matrixClient.ready = 1;
   }
 }
@@ -149,7 +142,7 @@ void mqttUpdate()
       if (rest != NULL)
       {
         snprintf(msg, MSG_BUFFER_SIZE, "%s", rest);
-        scrollText(9, 2, msg, (random(0x00FFFFFF)));
+        Message = String(msg);
       }
     }
     else if (strcmp(token, "ICON") == 0)
@@ -187,50 +180,136 @@ void mqttUpdate()
   }
 }
 
-void updateTime(unsigned long t)
+void getMonthName(uint8_t M)
+{
+  switch (M)
+  {
+  case 1:
+    MName = F("Ene");
+    break;
+  case 2:
+    MName = F("Feb");
+    break;
+  case 3:
+    MName = F("Mar");
+    break;
+  case 4:
+    MName = F("Abr");
+    break;
+  case 5:
+    MName = F("May");
+    break;
+  case 6:
+    MName = F("Jun");
+    break;
+  case 7:
+    MName = F("Jul");
+    break;
+  case 8:
+    MName = F("Ago");
+    break;
+  case 9:
+    MName = F("Sep");
+    break;
+  case 10:
+    MName = F("Oct");
+    break;
+  case 11:
+    MName = F("Nov");
+    break;
+  case 12:
+    MName = F("Dic");
+    break;
+  default:
+    MName = F("---");
+    break;
+  }
+}
+
+void updateTimeDate(unsigned long t)
 {
   String NTPtime = "";
-
-  if (((t % 86400L) / 3600) > 12)
+  String NTPdate = "";
+  uint8_t M, D, h, m;
+  struct tm *ptm = gmtime((time_t *)&t);
+  M = ptm->tm_mon + 1;
+  D = ptm->tm_mday;
+  h = ptm->tm_hour;
+  m = ptm->tm_min;
+  if (h > 12)
   {
-    t -= 43200;
+    h -= 12;
   }
-  if (((t % 86400L) / 3600) < 10)
+  if (h == 0)
+  {
+    h = 12;
+  }
+  if (h < 10)
   {
     NTPtime += "0";
   }
-  NTPtime += (t % 86400L) / 3600;
+  NTPtime += h;
   NTPtime += ":";
-  if (((t % 3600) / 60) < 10)
+  if (m < 10)
   {
     NTPtime += "0";
   }
-  NTPtime += (t % 3600) / 60;
+  NTPtime += m;
   if (currentTime != NTPtime)
   {
     currentTime = NTPtime;
-    ntp_updated = 1;
+  }
+
+  if (D < 10)
+  {
+    NTPdate += "0";
+  }
+  NTPdate += D;
+  NTPdate += "/";
+  if (M < 10)
+  {
+    NTPdate += "0";
+  }
+  NTPdate += M;
+/*  getMonthName(M);
+  NTPdate += MName;*/
+  if (currentDate != NTPdate)
+  {
+    currentDate = NTPdate;
   }
 }
 
 // Actualiza el display con el icono y el texto recibidos
 void renderDisplay(String icon, String text)
 {
-  if ((matrixClient.ready == 1) && (state != 0))
+  if (matrixClient.ready == 1)
   {
-    if (state != 0)
+    matrixClient.clear();
+    showIcon(0, 0, icon);
+    showText(10, 1, text, random(0xFFFFFF));
+  }
+}
+
+void scrollTimerCallback(void *pArg)
+{
+  if (do_scroll)
+  {
+    matrixClient.ready = 0;
+    if (--posX > (int)(Message.length() * -4))
     {
       matrixClient.clear();
-      showIcon(0, 0, icon);
-      scrollText(10, 1, text, random(0xFFFFFF));
+      matrixClient.setText(posX, 5, Message, scroll_color);
     }
     else
     {
-      matrixClient.clear();
-      showIcon(0, 0, icon);
-      showText(10, 1, text, random(0xFFFFFF));
-      state = 1;
+      do_scroll = false;
+      state_done = true;
+      matrixClient.ready = 1;
     }
+  }
+  else
+  {
+    posX = DISPLAY_MAX_X;
   }
 }
 
@@ -252,24 +331,63 @@ void notifyNTP()
   eventProcess(NTP_EVENT);
 }
 
+void stateProcess()
+{
+  switch (state)
+  {
+  case START_STATE:
+    Serial.println("Starting Wifi");
+    renderDisplay("/wifi_7.bmp", "Start");
+    break;
+  case CLOCK_STATE:
+    Serial.println(currentTime);
+    renderDisplay("/clock.bmp", currentTime);
+    break;
+  case DATE_STATE:
+    Serial.println(currentDate);
+    renderDisplay("/poop.bmp", currentDate);
+    break;
+  case MSG_STATE:
+    Serial.println("Mensaje");
+    showIcon(16, 0, "/message.bmp");
+    if (Message.length() > 0)
+    {
+      state_done = false;
+      scrollText(random(0xFFFFFF));
+    }
+    break;
+  default:
+    Serial.println("Paz y amor");
+    renderDisplay("/heart.bmp", "Paz y amor");
+    break;
+  }
+}
+
 void eventProcess(int8_t event)
 {
   switch (event)
   {
   case CLOCK_EVENT:
     Serial.printf("CLOCK EVENT\n");
-    if (state == 0)
+    if (state_done)
     {
-      renderDisplay("tongue.bmp", "start");
-    } else
-    {
-      if (ntp_updated == 1)
+      if (wifiClient.WiFiState() == IOTWEBCONF_STATE_ONLINE)
       {
-        ntp_updated = 0;
-        renderDisplay("/clock.bmp", currentTime);
+        if (state >= NUM_STATES)
+        {
+          state = 1;
+        }
+        else
+        {
+          state++;
+        }
       }
+      else
+      {
+        state = 0;
+      }
+      stateProcess();
     }
-
     break;
   case MQTT_EVENT:
     Serial.printf("MQTT EVENT\n");
@@ -277,7 +395,7 @@ void eventProcess(int8_t event)
     break;
   case NTP_EVENT:
     Serial.printf("NTP EVENT: %lu\n", ntpClient.epochTime);
-    updateTime(ntpClient.epochTime);
+    updateTimeDate(ntpClient.epochTime);
     break;
   default:
     break;
@@ -290,6 +408,9 @@ void setup()
   delay(1000);
   pinMode(BEEP_PIN, OUTPUT);
   state = 0;
+  state_done = true;
+  do_scroll = false;
+  Message = "";
   if (!LittleFS.begin())
   {
     fs_enabled = false;
@@ -298,15 +419,19 @@ void setup()
   {
     fs_enabled = true;
   }
-  Serial.println("Smartclock starting...");
+  Serial.println(F("Smartclock starting..."));
   currentTime = "--:--";
+  currentDate = "--/--";
 
   digitalWrite(BEEP_PIN, LOW);
   delay(100);
   digitalWrite(BEEP_PIN, HIGH);
 
-  os_timer_setfn(&myTimer, timerCallback, NULL);
-  os_timer_arm(&myTimer, 1000, true);
+  os_timer_setfn(&eventTimer, timerCallback, NULL);
+  os_timer_arm(&eventTimer, 5000, true);
+
+  os_timer_setfn(&scrollTimer, scrollTimerCallback, NULL);
+  os_timer_arm(&scrollTimer, 100, true);
 
   Scheduler.start(&matrixClient);
   Scheduler.start(&wifiClient);

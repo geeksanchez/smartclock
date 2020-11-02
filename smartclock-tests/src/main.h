@@ -5,11 +5,19 @@
 
 #define BEEP_PIN D4
 
+
 #define CLOCK_EVENT 0
 #define MQTT_EVENT  1
 #define NTP_EVENT   2
+#define NUM_EVENTS  3
 
-#define VERSION "0.20"
+#define START_STATE 0
+#define CLOCK_STATE 1
+#define DATE_STATE  2
+#define MSG_STATE   3
+#define NUM_STATES  4
+
+#define VERSION "0.21"
 #define BMP_FILE_HEADER_SIZE 14
 #define BMP_IMAGE_HEADER_SIZE 40
 

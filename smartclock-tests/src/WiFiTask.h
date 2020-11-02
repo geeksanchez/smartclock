@@ -8,6 +8,7 @@
 class WiFiTask : public Task
 {
 private:
+    void wifiConnected();
 
 protected:
     void setup();
@@ -15,6 +16,7 @@ protected:
 
 public:
     IotWebConf *wifi;
+    byte WiFiState();
 };
 
 #endif

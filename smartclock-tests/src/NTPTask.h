@@ -7,7 +7,6 @@ class NTPTask : public Task
 {
 
 private:
-    int wait_time;
 
 protected:
     void setup();

@@ -46,3 +46,8 @@ void WiFiTask::loop()
     iotWebConf->doLoop();
     yield();
 }
+
+byte WiFiTask::WiFiState()
+{
+    return iotWebConf->getState();
+}
