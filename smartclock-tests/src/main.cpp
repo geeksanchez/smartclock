@@ -45,6 +45,7 @@ void scrollText(uint32_t colour)
     scroll_color = colour;
     do_scroll = true;
     matrixClient.ready = 1;
+//    os_timer_arm(&scrollTimer, 100, true);
   }
 }
 
@@ -286,7 +287,7 @@ void renderDisplay(String icon, String text)
   {
     matrixClient.clear();
     showIcon(0, 0, icon);
-    showText(10, 1, text, random(0xFFFFFF));
+    showText(9, 1, text, random(0xFFFFFF));
   }
 }
 
@@ -305,6 +306,7 @@ void scrollTimerCallback(void *pArg)
       do_scroll = false;
       state_done = true;
       matrixClient.ready = 1;
+//      os_timer_disarm(&scrollTimer);
     }
   }
   else
@@ -349,7 +351,8 @@ void stateProcess()
     break;
   case MSG_STATE:
     Serial.println("Mensaje");
-    showIcon(16, 0, "/message.bmp");
+    matrixClient.clear();
+    showIcon(0, 0, "/message.bmp");
     if (Message.length() > 0)
     {
       state_done = false;
@@ -357,8 +360,8 @@ void stateProcess()
     }
     break;
   default:
-    Serial.println("Paz y amor");
-    renderDisplay("/heart.bmp", "Paz y amor");
+    Serial.println("Abrazos");
+    renderDisplay("/heart.bmp", "Abrazos");
     break;
   }
 }
