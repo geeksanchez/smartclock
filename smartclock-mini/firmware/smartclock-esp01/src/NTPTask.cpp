@@ -3,37 +3,34 @@
 #include <NTPClient.h>
 
 WiFiUDP ntpUDP;
-NTPClient timeClient(ntpUDP, "horalegal.inm.gov.co", (-5 * 60 * 60));
+NTPClient timeClient(ntpUDP, "pool.ntp.org", (-5 * 60 * 60));
+
+unsigned long lastMillis;
 
 void NTPTask::setup()
 {
     timeClient.begin();
-    cycles = 0;
+    lastMillis = millis();
     epochTime = 0;
-    wait_time = 1000;
 }
 
 void NTPTask::loop()
 {
-    cycles++;
-    if (timeClient.update())
+    if ((millis() - lastMillis) > 20000)
     {
-        epochTime = timeClient.getEpochTime();
-/*        struct tm *ptm = gmtime((time_t *)&epochTime);
-
-        Y = ptm->tm_year + 1900;
-        M = ptm->tm_mon + 1;
-        D = ptm->tm_mday;
-        h = ptm->tm_hour;
-        m = ptm->tm_min;
-        s = ptm->tm_sec;*/
-        notifyNTP();
-        cycles = 0;
-        wait_time = 1000;
+        if (timeClient.update())
+        {
+            if ((timeClient.getEpochTime() - epochTime) >= 60)
+            {
+                epochTime = timeClient.getEpochTime();
+                notify();
+            }
+        }
+        else
+        {
+            Serial.println("NTP update: fail");
+        }
+        lastMillis = millis();
     }
-    if (cycles > 10)
-    {
-        wait_time = 60000;
-    }
-    this->delay(wait_time);
+    yield();
 }

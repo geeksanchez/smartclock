@@ -8,7 +8,7 @@ IotWebConf *iotWebConf;
 /**
  * Handle web requests to "/" path.
  */
-void handleRoot()
+    void handleRoot()
 {
     // -- Let IotWebConf test and handle captive portal requests.
     if (iotWebConf->handleCaptivePortal())
@@ -45,4 +45,9 @@ void WiFiTask::loop()
 {
     iotWebConf->doLoop();
     yield();
+}
+
+byte WiFiTask::WiFiState()
+{
+    return iotWebConf->getState();
 }

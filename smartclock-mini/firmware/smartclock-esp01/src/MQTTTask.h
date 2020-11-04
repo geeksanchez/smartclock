@@ -3,9 +3,10 @@
 
 #include <Arduino.h>
 #include <Scheduler.h>
-#include <PubSubClient.h>
 
+#ifndef MSG_BUFFER_SIZE
 #define MSG_BUFFER_SIZE (256)
+#endif
 
 class MQTTTask : public Task
 {
@@ -21,7 +22,7 @@ protected :
 public:
     char command[MSG_BUFFER_SIZE];
     const char *title;
-    void (*notifyMQTT)();
+    void (*notify)();
     void publish(const char *topic, const char *payload);
 };
 

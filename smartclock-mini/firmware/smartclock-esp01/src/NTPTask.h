@@ -7,16 +7,14 @@ class NTPTask : public Task
 {
 
 private:
-    int wait_time;
-    int cycles;
 
 protected:
     void setup();
     void loop();
 
 public:
+    void (*notify)(void);
     unsigned long epochTime;
-    void (*notifyNTP)(void);
 };
 
 #endif

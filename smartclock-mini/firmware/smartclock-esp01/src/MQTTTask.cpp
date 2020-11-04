@@ -4,7 +4,7 @@
 #include <PubSubClient.h>
 
 const char *mqtt_server = "broker.hivemq.com";
-char mqttMsg[128];
+char mqttMsg[MSG_BUFFER_SIZE];
 
 WiFiClient espClient;
 PubSubClient mqttClient(espClient);
@@ -24,17 +24,15 @@ void MQTTTask::reconnect()
         // Create a random client ID
         String clientId = "smartclock-";
         clientId += String(random(0xffff), HEX);
-        yield();
+        Serial.println(clientId);
         // Attempt to connect
         if (mqttClient.connect(clientId.c_str()))
         {
             char ssid[50];
             snprintf(ssid, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
-            yield();
             // Once connected, publish an announcement...
             mqttClient.publish(ssid, "smartclock connected!");
             snprintf(ssid, 50, "sansila/smartclock/smartclock-%X/entrada", ESP.getChipId());
-            yield();
             // ... and resubscribe
             mqttClient.subscribe(ssid);
         }
@@ -52,8 +50,7 @@ void MQTTTask::mqttCallback(char *topic, byte *payload, unsigned int length)
     memcpy(p, payload, length);
     p[length] = '\0';
     strcpy(command, p);
-    yield();
-    notifyMQTT();
+    notify();
     free(p);
 }
 

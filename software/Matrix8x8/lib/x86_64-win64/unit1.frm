@@ -4,8 +4,9 @@ object Form1: TForm1
   Top = 143
   Width = 372
   Caption = 'Matrix 8x8'
-  ClientHeight = 522
+  ClientHeight = 502
   ClientWidth = 372
+  Menu = MainMenu1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   LCLVersion = '7.2'
@@ -60,5 +61,43 @@ object Form1: TForm1
     EditLabel.Caption = 'Nombre:'
     EditLabel.ParentColor = False
     TabOrder = 3
+  end
+  object imageAmpliada: TImage
+    Left = 288
+    Height = 80
+    Top = 192
+    Width = 80
+    Stretch = True
+  end
+  object imageOriginal: TImage
+    Left = 320
+    Height = 8
+    Top = 168
+    Width = 8
+  end
+  object OpenDialog1: TOpenDialog
+    DefaultExt = '.bmp'
+    Filter = 'Imagen BMP|*.bmp'
+    Options = [ofReadOnly, ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    Left = 312
+    Top = 15
+  end
+  object MainMenu1: TMainMenu
+    Left = 312
+    Top = 120
+    object MenuItem1: TMenuItem
+      Caption = 'Archivo'
+      object MenuItem2: TMenuItem
+        Caption = 'Cargar imagen...'
+        OnClick = MenuItem2Click
+      end
+      object N1: TMenuItem
+        Caption = '-'
+      end
+      object MenuItem4: TMenuItem
+        Caption = 'Salir'
+        OnClick = MenuItem4Click
+      end
+    end
   end
 end

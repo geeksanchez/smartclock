@@ -1,22 +1,30 @@
+#include <Arduino.h>
 #include "WiFiTask.h"
-#include "NTPTask.h"
+#include <IotWebConf.h>
+#include <FS.h>
+#include <LittleFS.h>
 #include "MQTTTask.h"
+#include "NTPTask.h"
 #include "CMDTask.h"
-
-#define VERSION "0.5s"
+#include "main.h"
 
 WiFiTask wifiClient;
 NTPTask ntpClient;
 MQTTTask mqttTaskClient;
 CMDTask cmdClient;
 
-void ntpUpdate();
-void mqttUpdate();
+int fs_enabled;
+int state;
+bool state_done;
+os_timer_t eventTimer;
+String currentTime, currentDate, MName, Message;
 
-void ntpUpdate()
+void eventProcess(int8_t event);
+
+void ntpUpdate(unsigned long t)
 {
   char msg[256];
-  snprintf(msg, 256, "NTP %lu", ntpClient.epochTime);
+  snprintf(msg, 256, "NTP %lu", t);
   cmdClient.sendMSG(msg);
 }
 
@@ -30,39 +38,157 @@ void mqttUpdate()
   if (token != NULL)
   {
     snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
-    if (strcmp(token, "WIFI") == 0)
+    if (strcmp(token, "INFO") == 0)
     {
-      snprintf(msg, 256, "SSID: %s", wifiClient.wifi->getWifiSsidParameter()->valueBuffer);
+      snprintf(msg, MSG_BUFFER_SIZE, "INFO: VERSION=%s UPTIME=%lums CPU=%dMHz %s", VERSION, millis(), ESP.getCpuFreqMHz(), ESP.getFullVersion().c_str());
       mqttTaskClient.publish(title, msg);
     }
-    else if (strcmp(token, "TIME") == 0)
+    else if (strcmp(token, "WIFI") == 0)
     {
-      snprintf(msg, 256, "TIME: %lu", ntpClient.epochTime);
+      snprintf(msg, MSG_BUFFER_SIZE, "SSID: %s", wifiClient.wifi->getWifiSsidParameter()->valueBuffer);
       mqttTaskClient.publish(title, msg);
     }
-    else if (strcmp(token, "INFO") == 0)
+    else if (strcmp(token, "IPADDR") == 0)
     {
-      snprintf(msg, 256, "INFO: UPTIME:%lums CPU:%dMHz %s", millis(), ESP.getCpuFreqMHz(), ESP.getFullVersion().c_str());
+      snprintf(msg, MSG_BUFFER_SIZE, "%s", WiFi.localIP().toString().c_str());
       mqttTaskClient.publish(title, msg);
+    }
+    else if (strcmp(token, "RESET") == 0)
+    {
+      if (rest != NULL)
+      {
+        snprintf(msg, MSG_BUFFER_SIZE, "%X", ESP.getChipId());
+        if (strcmp(msg, rest) == 0)
+        {
+          ESP.restart();
+        }
+      }
     }
   }
 }
 
-void cmdUpdate(char *msg)
+// Evento de reloj que ocurre cada 1 segundo
+void notifyClock(void *pArg)
+{
+  eventProcess(CLOCK_EVENT);
+}
+
+void notifyCMD(char *msg)
 {
   char title[50];
   snprintf(title, 50, "sansila/smartclock/smartclock-%X/salida", ESP.getChipId());
   mqttTaskClient.publish(title, msg);
+  eventProcess(CMD_EVENT);
+}
+
+void notifyMQTT()
+{
+  eventProcess(MQTT_EVENT);
+}
+
+void notifyNTP()
+{
+  eventProcess(NTP_EVENT);
+}
+
+void stateProcess()
+{
+  switch (state)
+  {
+  case START_STATE:
+    Serial.println("Starting Wifi");
+    break;
+  case CLOCK_STATE:
+    Serial.println(currentTime);
+    break;
+  case DATE_STATE:
+    Serial.println(currentDate);
+    break;
+  case MSG_STATE:
+    Serial.println("Mensaje");
+    if (Message.length() > 0)
+    {
+      state_done = false;
+    }
+    break;
+  default:
+    Serial.println("Abrazos");
+    break;
+  }
+}
+
+void eventProcess(int8_t event)
+{
+  switch (event)
+  {
+  case CLOCK_EVENT:
+    Serial.printf("CLOCK EVENT\n");
+    if (state_done)
+    {
+      if (wifiClient.WiFiState() == IOTWEBCONF_STATE_ONLINE)
+      {
+        if (state >= NUM_STATES)
+        {
+          state = 1;
+        }
+        else
+        {
+          state++;
+        }
+      }
+      else
+      {
+        state = 0;
+      }
+      stateProcess();
+    }
+    break;
+  case MQTT_EVENT:
+    Serial.printf("MQTT EVENT\n");
+    mqttUpdate();
+    break;
+  case NTP_EVENT:
+    Serial.printf("NTP EVENT: %lu\n", ntpClient.epochTime);
+    ntpUpdate(ntpClient.epochTime);
+    break;
+  default:
+    break;
+  }
 }
 
 void setup()
 {
+  Serial.begin(115200);
+  delay(1000);
+  pinMode(BEEP_PIN, OUTPUT);
+  state = 0;
+  state_done = true;
+  Message = "";
+  if (!LittleFS.begin())
+  {
+    fs_enabled = false;
+  }
+  else
+  {
+    fs_enabled = true;
+  }
+  Serial.println(F("Smartclock starting..."));
+  currentTime = "--:--";
+  currentDate = "--/--";
+
+  digitalWrite(BEEP_PIN, LOW);
+  delay(100);
+  digitalWrite(BEEP_PIN, HIGH);
+
+  os_timer_setfn(&eventTimer, notifyClock, NULL);
+  os_timer_arm(&eventTimer, 5000, true);
+
   Scheduler.start(&wifiClient);
-  ntpClient.notifyNTP = &ntpUpdate;
+  ntpClient.notify = &notifyNTP;
   Scheduler.start(&ntpClient);
-  mqttTaskClient.notifyMQTT = &mqttUpdate;
+  mqttTaskClient.notify = &notifyMQTT;
   Scheduler.start(&mqttTaskClient);
-  cmdClient.recvMSG = &cmdUpdate;
+  cmdClient.recvMSG = &notifyCMD;
   Scheduler.start(&cmdClient);
   Scheduler.begin();
 }

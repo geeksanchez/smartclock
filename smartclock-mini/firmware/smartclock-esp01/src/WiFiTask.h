@@ -8,14 +8,15 @@
 class WiFiTask : public Task
 {
 private:
+    void wifiConnected();
 
-protected: 
+protected:
     void setup();
     void loop();
 
 public:
     IotWebConf *wifi;
-
+    byte WiFiState();
 };
 
 #endif
