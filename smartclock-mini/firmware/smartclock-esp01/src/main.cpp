@@ -21,6 +21,14 @@ String currentTime, currentDate, MName, Message;
 
 void eventProcess(int8_t event);
 
+void clockUpdate()
+{
+}
+
+void cmdUpdate()
+{
+}
+
 void ntpUpdate(unsigned long t)
 {
   char msg[256];
@@ -67,7 +75,6 @@ void mqttUpdate()
   }
 }
 
-// Evento de reloj que ocurre cada 1 segundo
 void notifyClock(void *pArg)
 {
   eventProcess(CLOCK_EVENT);
@@ -91,57 +98,13 @@ void notifyNTP()
   eventProcess(NTP_EVENT);
 }
 
-void stateProcess()
-{
-  switch (state)
-  {
-  case START_STATE:
-    Serial.println("Starting Wifi");
-    break;
-  case CLOCK_STATE:
-    Serial.println(currentTime);
-    break;
-  case DATE_STATE:
-    Serial.println(currentDate);
-    break;
-  case MSG_STATE:
-    Serial.println("Mensaje");
-    if (Message.length() > 0)
-    {
-      state_done = false;
-    }
-    break;
-  default:
-    Serial.println("Abrazos");
-    break;
-  }
-}
-
 void eventProcess(int8_t event)
 {
   switch (event)
   {
   case CLOCK_EVENT:
     Serial.printf("CLOCK EVENT\n");
-    if (state_done)
-    {
-      if (wifiClient.WiFiState() == IOTWEBCONF_STATE_ONLINE)
-      {
-        if (state >= NUM_STATES)
-        {
-          state = 1;
-        }
-        else
-        {
-          state++;
-        }
-      }
-      else
-      {
-        state = 0;
-      }
-      stateProcess();
-    }
+    clockUpdate();
     break;
   case MQTT_EVENT:
     Serial.printf("MQTT EVENT\n");
@@ -150,6 +113,10 @@ void eventProcess(int8_t event)
   case NTP_EVENT:
     Serial.printf("NTP EVENT: %lu\n", ntpClient.epochTime);
     ntpUpdate(ntpClient.epochTime);
+    break;
+  case CMD_EVENT:
+    Serial.printf("CMD EVENT: %lu\n", ntpClient.epochTime);
+    cmdUpdate();
     break;
   default:
     break;
