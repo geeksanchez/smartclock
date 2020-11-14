@@ -347,7 +347,7 @@ void stateProcess()
     break;
   case DATE_STATE:
     Serial.println(currentDate);
-    renderDisplay("/poop.bmp", currentDate);
+    renderDisplay("/agenda.bmp", currentDate);
     break;
   case MSG_STATE:
     Serial.println("Mensaje");
