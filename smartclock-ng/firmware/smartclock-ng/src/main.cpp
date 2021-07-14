@@ -2,15 +2,24 @@
 #include <WiFiManager.h>
 #include <TaskScheduler.h>
 #include <ArduinoOTA.h>
+#include <WiFiUdp.h>
+#include <NTPClient.h>
 
 void tickSecondCallback();
 bool setupOTACallback();
 void handleOTACallback();
+bool ntpSetupCallback();
+void ntpUpdateCallback();
 
 Scheduler ts;
 
 Task timeTick(1000, TASK_FOREVER, &tickSecondCallback, &ts, true);
 Task tOTA(TASK_IMMEDIATE, TASK_FOREVER, &handleOTACallback, &ts, false, &setupOTACallback);
+Task tupdateTime(TASK_MINUTE, TASK_FOREVER, &ntpUpdateCallback, &ts, false, &ntpSetupCallback);
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", (-5 * 60 * 60));
+unsigned long epochTime;
 
 int connectWiFi() {
   WiFi.mode(WIFI_STA);
@@ -30,8 +39,9 @@ void setup() {
   Serial.begin(115200);
   if (connectWiFi() == 1) {
     Serial.println("Connected!!!");
+    tOTA.enable();
+    tupdateTime.enable();
   };
-  tOTA.enable();
 }
 
 void loop() {
@@ -39,14 +49,6 @@ void loop() {
 }
 
 void tickSecondCallback() {
-  Serial.println(millis());
-
-  long rssi = WiFi.RSSI();
-  Serial.print("signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
-  Serial.printf("smartclock-ng-%04X\n", ESP.getChipId());
-  Serial.println(WiFi.localIP());
 }
 
 bool setupOTACallback() {
@@ -100,4 +102,23 @@ bool setupOTACallback() {
 
 void handleOTACallback() {
   ArduinoOTA.handle();
+}
+
+bool ntpSetupCallback() {
+  timeClient.begin();
+  return true;
+};
+
+void ntpUpdateCallback() {
+  if (timeClient.update()) {
+    epochTime = timeClient.getEpochTime();
+    Serial.println(timeClient.getFormattedTime());
+    
+  }
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+  Serial.printf("smartclock-ng-%04X\n", ESP.getChipId());
+  Serial.println(WiFi.localIP());
 }
