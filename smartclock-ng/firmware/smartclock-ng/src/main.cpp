@@ -4,12 +4,13 @@
 #include <ArduinoOTA.h>
 
 void tickSecondCallback();
-void handleOTA();
+bool setupOTACallback();
+void handleOTACallback();
 
 Scheduler ts;
 
 Task timeTick(1000, TASK_FOREVER, &tickSecondCallback, &ts, true);
-Task tOTA(TASK_IMMEDIATE, TASK_FOREVER, &handleOTA, &ts, false);
+Task tOTA(TASK_IMMEDIATE, TASK_FOREVER, &handleOTACallback, &ts, false, &setupOTACallback);
 
 int connectWiFi() {
   WiFi.mode(WIFI_STA);
@@ -25,7 +26,30 @@ int connectWiFi() {
   return 1;
 }
 
-void setupOTA() {
+void setup() {
+  Serial.begin(115200);
+  if (connectWiFi() == 1) {
+    Serial.println("Connected!!!");
+  };
+  tOTA.enable();
+}
+
+void loop() {
+  ts.execute();
+}
+
+void tickSecondCallback() {
+  Serial.println(millis());
+
+  long rssi = WiFi.RSSI();
+  Serial.print("signal strength (RSSI):");
+  Serial.print(rssi);
+  Serial.println(" dBm");
+  Serial.printf("smartclock-ng-%04X\n", ESP.getChipId());
+  Serial.println(WiFi.localIP());
+}
+
+bool setupOTACallback() {
   char ssid[23];
   snprintf(ssid, 23, "smartclock-ng-%04X", ESP.getChipId());
   ArduinoOTA.setPort(8266);
@@ -71,32 +95,9 @@ void setupOTA() {
   Serial.println("OTA Ready");
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());
-  tOTA.enable();
+  return true;
 }
 
-void setup() {
-  Serial.begin(115200);
-  if (connectWiFi() == 1) {
-    Serial.println("Connected!!!");
-  };
-  setupOTA();
-}
-
-void loop() {
-  ts.execute();
-}
-
-void tickSecondCallback() {
-  Serial.println(millis());
-
-  long rssi = WiFi.RSSI();
-  Serial.print("signal strength (RSSI):");
-  Serial.print(rssi);
-  Serial.println(" dBm");
-  Serial.printf("smartclock-ng-%04X\n", ESP.getChipId());
-  Serial.println(WiFi.localIP());
-}
-
-void handleOTA() {
+void handleOTACallback() {
   ArduinoOTA.handle();
 }
