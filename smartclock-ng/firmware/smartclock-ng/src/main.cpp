@@ -4,51 +4,70 @@
 #include <ArduinoOTA.h>
 #include <WiFiUdp.h>
 #include <NTPClient.h>
+#include <FastLED.h>        //https://github.com/FastLED/FastLED
+#include <LEDMatrix.h>      //https://github.com/Jorgen-VikingGod/LEDMatrix
 
-void tickSecondCallback();
+// Change the next defines to match your matrix type and size
+#define DATA_PIN            2
+#define COLOR_ORDER         GRB
+#define CHIPSET             WS2812B
+
+// initial matrix layout (to get led strip index by x/y)
+#define MATRIX_WIDTH        16
+#define MATRIX_HEIGHT       16
+#define MATRIX_TYPE         HORIZONTAL_ZIGZAG_MATRIX
+#define MATRIX_SIZE         (MATRIX_WIDTH*MATRIX_HEIGHT)
+#define NUMPIXELS           MATRIX_SIZE
+#define NUM_LEDS            (MATRIX_WIDTH*MATRIX_HEIGHT)
+
+
+void tickLEDCallback();
 bool setupOTACallback();
 void handleOTACallback();
 bool ntpSetupCallback();
 void ntpUpdateCallback();
+bool setupLEDCallback();
 
 Scheduler ts;
 
-Task timeTick(1000, TASK_FOREVER, &tickSecondCallback, &ts, true);
+Task timeLEDTick(1000, TASK_FOREVER, &tickLEDCallback, &ts, true, &setupLEDCallback);
 Task tOTA(TASK_IMMEDIATE, TASK_FOREVER, &handleOTACallback, &ts, false, &setupOTACallback);
 Task tupdateTime(TASK_MINUTE, TASK_FOREVER, &ntpUpdateCallback, &ts, false, &ntpSetupCallback);
+
+WiFiManager wm;
 
 WiFiUDP ntpUDP;
 NTPClient timeClient(ntpUDP, "pool.ntp.org", (-5 * 60 * 60));
 unsigned long epochTime;
 
-int connectWiFi() {
+cLEDMatrix<MATRIX_WIDTH, MATRIX_HEIGHT, MATRIX_TYPE> leds;
+int led_x_pos, led_y_pos;
+
+void connectWiFi() {
   WiFi.mode(WIFI_STA);
-  WiFiManager wm;
   bool res;
   char ssid[23];
   snprintf(ssid, 23, "smartclock-ng-%04X", ESP.getChipId());
+  wm.setConfigPortalBlocking(false);
   res = wm.autoConnect(ssid, "password");
   if (!res) {
     Serial.println("Failed to connect");
-    ESP.restart();
+  } else {
+    Serial.println("Configportal running");
   }
-  return 1;
 }
 
 void setup() {
   Serial.begin(115200);
-  if (connectWiFi() == 1) {
-    Serial.println("Connected!!!");
-    tOTA.enable();
-    tupdateTime.enable();
-  };
+  connectWiFi();
+  Serial.println("Connected!!!");
+  tOTA.enable();
+  tupdateTime.enable();
 }
 
 void loop() {
+  wm.process();
   ts.execute();
-}
-
-void tickSecondCallback() {
 }
 
 bool setupOTACallback() {
@@ -121,4 +140,37 @@ void ntpUpdateCallback() {
   Serial.println(" dBm");
   Serial.printf("smartclock-ng-%04X\n", ESP.getChipId());
   Serial.println(WiFi.localIP());
+  Serial.println(WiFi.SSID());
+}
+
+void matrix_clear() {
+    //FastLED[1].clearLedData();
+    // clear does not work properly with multiple matrices connected via parallel inputs
+    memset(leds[0], 0, NUM_LEDS*3);
+}
+
+bool setupLEDCallback() {
+  led_x_pos = 0;
+  led_y_pos = 0;
+  // initial LEDs
+  FastLED.addLeds<CHIPSET, DATA_PIN, COLOR_ORDER>(leds[0], leds.Size()).setCorrection(TypicalSMD5050);
+  FastLED.setCorrection(TypicalLEDStrip);
+  FastLED.setBrightness(32);
+  FastLED.clear(true);
+  return true;
+}
+
+void tickLEDCallback() {
+  leds.DrawPixel(led_x_pos, led_y_pos, CRGB(0, 0, 0));
+  if (led_x_pos == 15) {
+    led_x_pos = 0;
+    if (led_y_pos == 15) {
+      led_y_pos = 0;
+    } else {
+      led_y_pos++;
+    }
+  } else {
+    led_x_pos++;
+  }
+  leds.DrawPixel(led_x_pos, led_y_pos, CRGB(80, 160, 240));
 }
